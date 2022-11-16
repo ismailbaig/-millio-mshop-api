@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema({
 
 const User = new mongoose.model("User", userSchema);
 
+app.get("/test", (req, res) => {
+    res.send("test");
+})
+
 app.get("/login/:id", (req, res) => {
     console.log(req.body);
     console.log(req.params.id);
@@ -32,8 +36,8 @@ app.get("/login/:id", (req, res) => {
 
 //Routes
 app.post("/register", (req, res) => {
-    console.log(req.body);
-    const { name, email, password} = req.body;
+    console.log(req.query);
+    const { name, email, password} = req.query;
 
     User.findOne({email: email}, (err, user) => {
         if(user) {
@@ -52,6 +56,23 @@ app.post("/register", (req, res) => {
             })
         }
     })
+});
+
+app.post("/login", (req, res) => {
+    const { uid, pd } = req.query;
+    User.findOne({name: uid, password: pd}, (err, user) => {
+        if(user) {
+            res.send({message: "User Logged in succesfull!!"});
+            //Generate JWT token
+        }else {
+            res.send({message: "Either User Id or Password is incorrect!!"});
+        }
+    })
+})
+
+//This should work only after JWT is valid
+app.get("dashboard", (req, res) => {
+    // chck for JWT validation
 });
 
 app.listen(9400, () => {
