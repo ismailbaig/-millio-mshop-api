@@ -1,6 +1,10 @@
-import express from 'express'
+import express, { response } from 'express'
 import cors from 'cors'
 import mongoose from 'mongoose'
+import jwt from 'jsonwebtoken'
+//import customersRouter from 'customers'
+
+var router = express.Router();
 
 const app = express();
 app.use(express.json());
@@ -61,14 +65,67 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
     const { uid, pd } = req.query;
     User.findOne({name: uid, password: pd}, (err, user) => {
+        if(err) {
+            res.status(500).json({
+                message: 'Error'
+                });
+        }
         if(user) {
-            res.send({message: "User Logged in succesfull!!"});
-            //Generate JWT token
+            let userdata = {
+                username: uid,
+                password: pd
+            }
+            let token = jwt.sign(userdata, "mysecretkey123", {
+                algorithm: 'HS256',
+                expiresIn: '10m'
+            });
+
+            res.status(200).json({
+                message: 'Login Successful',
+                jwtoken: 'Bearer ' + token
+                });
+
         }else {
-            res.send({message: "Either User Id or Password is incorrect!!"});
+            res.status(401).json({
+                message: 'Login Failed 2'
+                });
         }
     })
 })
+
+app.post("/testtoken", verifyToken, (req, res, next) => {
+    jwt.verify(req.token, "mysecretkey123", (err, authData) => {
+        if(err){
+            res.status(403).json({
+                message: "Invalid Token validated!!",        
+              });
+        } else {
+            res.status(200).json({
+                message: "Token validated!!",        
+              });
+        }            
+    })
+});
+
+function verifyToken(req, res, next) {
+
+    const bearerHeader = req.headers["authorization"];
+  
+    if (typeof bearerHeader !== "undefined") {
+  
+      const bearerToken = bearerHeader.split(" ")[1];
+  
+      req.token = bearerToken;
+  
+      next();
+  
+    } else {
+  
+      res.sendStatus(403);
+  
+    }
+  
+  }
 
 //This should work only after JWT is valid
 app.get("dashboard", (req, res) => {
@@ -79,7 +136,7 @@ app.listen(9400, () => {
     console.log("hi from Node!!")
 })
 
-
+//module.exports = index;
 
 /*
 var fs = require('fs');
