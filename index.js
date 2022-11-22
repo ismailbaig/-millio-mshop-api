@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
     password: String
 });
 
-export const itembasedetailsModel = new mongoose.Schema({
+const itembasedetailsModel = new mongoose.Schema({
     pkItemId: Number,
     id: Number,
     uniqueId: String,
