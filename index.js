@@ -104,7 +104,23 @@ app.post("/register", (req, res) => {
 });
 
 //Gets all data from Collection for Items base information
-app.get("/gtalitms", verifyToken, (req, res) => {
+app.get("/gtalitms", (req, res) => {
+    itembasedetails.find( {},  (err, result) => {
+        if (err) {
+            res.send(err);
+        } else {
+            var data = {
+                packageFee: 120,
+                deliveryFee: 0,
+                itemsBasicDetails: result
+            }
+            res.status(200).json(data);
+        }
+    });
+});
+
+
+app.get("/gtalitms_old", verifyToken, (req, res) => {
     jwt.verify(req.token, options.skey, (err, data) => {
         if(err){
             res.status(403).json({
