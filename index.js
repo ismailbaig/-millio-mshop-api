@@ -21,7 +21,8 @@ mongoose.connect('mongodb://localhost:27017/milliodb', {
 const userSchema = new mongoose.Schema({
     name: String,
     email: String,
-    password: String
+    password: String,
+    id: Number,
 });
 
 const itembasedetailsModel = new mongoose.Schema({
@@ -44,14 +45,14 @@ const itembasedetailsModel = new mongoose.Schema({
     imageName: String
 });
 
-const User = new mongoose.model("User", userSchema);
+const Users = new mongoose.model("User", userSchema);
 const itembasedetails = new mongoose.model("itembasedetails", itembasedetailsModel);
 // Mongoose Schema - End
 
 //Application Routes - Start
 app.post("/login", (req, res) => {
     const { uid, pd } = req.query;
-    User.findOne({name: uid, password: pd}, (err, user) => {
+    Users.findOne({name: uid, password: pd}, (err, user) => {
         if(err) {
             res.status(500).json({
                 message: 'Error'
@@ -84,11 +85,11 @@ app.post("/register", (req, res) => {
     console.log(req.query);
     const { name, email, password} = req.query;
 
-    User.findOne({email: email}, (err, user) => {
+    Users.findOne({email: email}, (err, user) => {
         if(user) {
             res.send({message: "User already exists"})
         } else {
-            const user = new User({
+            const user = new Users({
                 name, email, password
             });
 
@@ -180,6 +181,23 @@ app.post("/testtoken", verifyToken, (req, res, next) => {
 app.get("/test", (req, res) => {
     res.send("test");
 });
+
+app.get("/updatetest/:id/:pd", (req, res) => {
+    const { id, pd} = req.params;
+    Users.updateOne({id: id}, { $set : { password : pd }}, (err, data) => {
+        if(err){
+            res.status(403).json({
+                message: "NOT Updated !!",        
+              });
+        } else {
+            res.status(200).json({
+                updtedData: data     
+              });
+        }  
+    });
+});
+
+
 // Test Routes - END
 
 //Middle ware
@@ -206,3 +224,16 @@ function verifyToken(req, res, next) {
 app.listen(9400, () => {
     console.log("hi from Node!!")
 });
+
+/*
+var MongoClient = require('mongodb').MongoClient;
+//Create a database named "mydb":
+var url = "mongodb://localhost:27017/mydb";
+
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  console.log("Database created!");
+  db.close();
+});
+
+*/
