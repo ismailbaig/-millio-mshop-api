@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(cors());
 
-mongoose.connect('mongodb://localhost:27017/milliodb', {
+mongoose.connect('mongodb://127.0.0.1:27017/milliodb', { 
     useNewUrlparser: true,
     useunifiedTopology: true
 }, () => {
@@ -197,6 +197,41 @@ app.get("/updatetest/:id/:pd", (req, res) => {
     });
 });
 
+// update pd using name
+app.post("/uppd", (req, res) => {
+    const { name, pd} = req.query;
+    Users.updateOne({name: name}, { $set : { password : pd }}, (err, data) => {
+        if(err){
+            res.status(403).json({
+                message: "NOT Updated !!",        
+              });
+        } else {
+            res.status(200).json({
+                updtedData: data     
+              });
+        }  
+    });
+});
+
+// multiple update using updateMany
+
+//Update all documents where the ItemName starts with the letter "P"
+app.post("/upitms", (req, res) => {
+    const { rc} = req.query;
+    var myquery = { itemName: /^P/ };
+    var newvalues = {$set: {reviewCount: rc}};
+    itembasedetails.updateMany( myquery, newvalues, (err, data) => {
+        if(err){
+            res.status(403).json({
+                message: "NOT Updated !!",        
+              });
+        } else {
+            res.status(200).json({
+                updtedData: data     
+              });
+        }  
+    });
+});
 
 // Test Routes - END
 
